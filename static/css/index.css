@@ -8,7 +8,7 @@
   --text-secondary: #64748b;
   --text-light: #94a3b8;
   --background-primary: #ffffff;
-  --background-secondary: #f8fafc;
+  --background-secondary: rgb(255 255 255 / 0.65);
   --background-accent: #f1f5f9;
   --border-color: #e2e8f0;
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -34,8 +34,40 @@ body {
   line-height: 1.6;
   font-size: 16px;
   background-color: var(--background-primary);
+  isolation: isolate;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* A soft, expanding spotlight behind the content follows the pointer. */
+.cursor-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cursor-glow::before {
+  content: '';
+  position: absolute;
+  left: var(--cursor-x, 50%);
+  top: var(--cursor-y, 50%);
+  width: 1000px;
+  height: 1000px;
+  background: radial-gradient(circle, rgb(255 219 91 / 0.25) 0%, rgb(255 231 139 / 0.15) 32%, rgb(255 242 189 / 0.06) 52%, transparent 70%);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.65);
+  transition: opacity 400ms ease, transform 900ms ease-out;
+}
+
+.cursor-glow.is-active::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+@media (hover: none), (pointer: coarse), print {
+  .cursor-glow { display: none; }
 }
 
 
@@ -94,7 +126,7 @@ body {
 }
 
 .hero.is-light {
-  background: var(--background-secondary);
+  background: rgb(255 255 255 / 0.35);
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
 }
@@ -315,19 +347,6 @@ body {
   color: var(--text-primary);
   margin-bottom: 2rem !important;
   position: relative;
-  padding-bottom: 1rem;
-}
-
-.title.is-3::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: var(--gradient-accent);
-  border-radius: 2px;
 }
 
 /* Content Improvements */
@@ -343,7 +362,7 @@ body {
 
 /* Footer Improvements */
 .footer {
-  background: var(--background-secondary);
+  background: rgb(255 255 255 / 0.35);
   border-top: 1px solid var(--border-color);
   padding: 3rem 1.5rem;
 }
@@ -751,3 +770,134 @@ a:focus {
 
 
 
+/* LaRA poster content */
+.lara-overview {
+  padding-top: 0;
+}
+
+.lara-tldr {
+  padding: 1.75rem 2rem;
+  border-left: 5px solid #f0d32c;
+  border-radius: var(--border-radius);
+  background: rgb(255 255 255 / 0.65);
+  color: #073773;
+}
+
+.lara-eyebrow {
+  color: #073773;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+}
+
+.lara-tldr .title {
+  color: #073773;
+  margin-bottom: 1rem;
+}
+
+.lara-figure,
+.content .lara-figure {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.lara-figure > a {
+  display: block;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
+  background: white;
+}
+
+.lara-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lara-figure figcaption,
+.content .lara-figure figcaption {
+  margin-top: 0.8rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-style: normal;
+  line-height: 1.6;
+}
+
+.lara-metrics,
+.lara-result-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.75rem 0;
+}
+
+.lara-metric,
+.lara-result-highlights > div {
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--background-secondary);
+}
+
+.content .lara-metric h3 {
+  margin: 0 0 1rem;
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+.lara-result-highlights strong,
+.lara-result-highlights span {
+  display: block;
+}
+
+.lara-result-highlights strong {
+  margin-bottom: 0.5rem;
+  color: #073773;
+  font-size: 1.65rem;
+}
+
+.content .lara-protocol li {
+  padding-left: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.lara-score {
+  padding: 1rem 1.25rem;
+  background: white;
+  border-left: 4px solid #f0d32c;
+}
+
+.lara-ablation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: center;
+}
+
+.content .lara-ablation .lara-figure {
+  margin: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .lara-metrics,
+  .lara-result-highlights,
+  .lara-ablation {
+    grid-template-columns: 1fr;
+  }
+
+  .lara-tldr {
+    padding: 1.25rem;
+  }
+
+  .lara-figure > a {
+    padding: 0.35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero, .section { animation: none; }
+  .cursor-glow::before { transition: none; }
+}

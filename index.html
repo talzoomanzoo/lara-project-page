@@ -63,7 +63,7 @@
     }
   ],
   "datePublished": "2026-05-28",
-  "dateModified": "2026-08-31",
+  "dateModified": "2026-10-22",
   "description": "LaRA detects data contamination in RL post-trained language models through layer-wise analysis of perturbation sensitivity, directional collapse, and local rigidity.",
   "abstract": "Reinforcement learning (RL) post-training has shown to improve reasoning in large language models (LLMs). However, there has been little exploration on the problem of data contamination in RL post-training, potentially undermining generalization and evaluation reliability of the training process itself.\nExisting detection methods primarily rely on output-level signals such as likelihood or entropy, which become unreliable for RL-trained models since RL shapes behavior through trajectory-level rewards rather than token likelihoods. We propose LaRA, a layer-wise representation analysis framework for detecting contamination in RL post-trained LLMs.\nLaRA introduces three complementary metrics, measuring perturbation sensitivity, directional collapse, and local representation rigidity under controlled perturbations. We find that contamination produces progressive geometric deviations across layers, including amplified perturbation sensitivity, stronger directional collapse, and enhanced local rigidity. Based on our findings, we also develop a contamination detection protocol that aggregates representation-level deviations across layers and metrics.\nExperiments on RL-trained reasoning models show that our protocol outperforms existing output-level baselines for contamination detection.",
   "url": "https://arxiv.org/abs/2605.29888",
@@ -72,6 +72,7 @@
 }</script>
 </head>
 <body>
+  <div class="cursor-glow" aria-hidden="true"></div>
   <main id="main-content">
     <section class="hero">
       <div class="hero-body">
@@ -88,8 +89,24 @@
             <span class="link-block"><a class="external-link button is-normal is-rounded is-dark" href="https://arxiv.org/pdf/2605.29888" target="_blank" rel="noopener noreferrer">Paper (PDF)</a></span>
             <span class="link-block"><a class="external-link button is-normal is-rounded is-dark" href="https://arxiv.org/abs/2605.29888" target="_blank" rel="noopener noreferrer">arXiv</a></span>
             <span class="link-block"><a class="external-link button is-normal is-rounded is-dark" href="https://github.com/talzoomanzoo/lara" target="_blank" rel="noopener noreferrer">GitHub</a></span>
+            <span class="link-block"><a class="external-link button is-normal is-rounded is-dark" href="static/pdfs/emnlp_lara_poster_A0.pdf" target="_blank" rel="noopener noreferrer">Poster (PDF)</a></span>
           </div>
         </div>
+      </div>
+    </section>
+    <section class="section lara-overview" aria-labelledby="overview-title">
+      <div class="container is-max-desktop">
+        <div class="lara-tldr">
+          <p class="lara-eyebrow">TL;DR</p>
+          <h2 class="title is-4" id="overview-title">How do model internals change in RL-trained models?</h2>
+          <p>LaRA detects contamination by examining how internal representations change across layers. Its key hypothesis: <strong>memorization leaves geometric fingerprints in hidden representations.</strong></p>
+        </div>
+        <figure class="lara-figure">
+          <a href="static/images/motivating_figure.pdf" target="_blank" rel="noopener noreferrer" aria-label="Open the motivation figure as a PDF">
+            <img src="static/images/motivating_figure.png" width="3000" height="1557" alt="Output-level detection can suffer from miscalibrated token probabilities. Layer-level detection instead compares hidden representations of initial and perturbed questions through magnitude, direction, and variance.">
+          </a>
+          <figcaption>Why look inside the model? LaRA examines changes in hidden representations to address the limitations of output-level detection. <a href="static/images/motivating_figure.pdf" target="_blank" rel="noopener noreferrer">View original PDF</a>.</figcaption>
+        </figure>
       </div>
     </section>
     <section class="section hero is-light" aria-labelledby="abstract-title">
@@ -104,13 +121,100 @@
     <section class="section" aria-labelledby="approach-title">
       <div class="container is-max-desktop content">
         <h2 class="title is-3" id="approach-title">Layer-wise representation analysis</h2>
-        <p>LaRA examines how hidden representations respond to controlled changes in a question. It combines three complementary measurements across transformer layers:</p>
+        <p>Output-level detectors examine statistics such as likelihood and entropy. RL optimizes trajectory-level rewards rather than token likelihood, motivating a closer look at the model's hidden representations.</p>
+        <figure class="lara-figure">
+          <a href="static/images/method_overview.pdf" target="_blank" rel="noopener noreferrer" aria-label="Open the LaRA method overview as a PDF">
+            <img src="static/images/method_overview.png" width="3000" height="1372" loading="lazy" alt="LaRA removes key information from a question, creates semantic-preserving local variants, and measures representation shift, directional collapse, and rigidity at each layer. The aggregated score separates clean and contaminated samples.">
+          </a>
+          <figcaption>Overview of LaRA: controlled perturbations reveal representation geometry, which is aggregated into a layer-wise contamination profile. Higher scores indicate a greater likelihood of contamination. <a href="static/images/method_overview.pdf" target="_blank" rel="noopener noreferrer">View original PDF</a>.</figcaption>
+        </figure>
+        <p>LaRA removes key information from a question and generates semantic-preserving local variants. Three complementary metrics track the resulting geometry across transformer layers:</p>
+        <div class="lara-metrics">
+          <article class="lara-metric">
+            <p class="lara-eyebrow">RSM</p>
+            <h3>Representation Shift Magnitude</h3>
+            <p><strong>How much does the representation move?</strong></p>
+            <p>Measures sensitivity to removing key information from the original question.</p>
+          </article>
+          <article class="lara-metric">
+            <p class="lara-eyebrow">DC</p>
+            <h3>Directional Collapse</h3>
+            <p><strong>Where does it move?</strong></p>
+            <p>Examines the directional alignment of representation shifts among semantically related questions.</p>
+          </article>
+          <article class="lara-metric">
+            <p class="lara-eyebrow">RSI</p>
+            <h3>Representation Stability Index</h3>
+            <p><strong>How stable is the representation?</strong></p>
+            <p>Measures local variability under semantic-preserving perturbations to characterize representation rigidity.</p>
+          </article>
+        </div>
+        <figure class="lara-figure">
+          <a href="static/images/lara-layer-geometry.png" target="_blank" rel="noopener noreferrer" aria-label="View the layer-wise representation plots at full size">
+            <img src="static/images/lara-layer-geometry.png" width="1177" height="392" loading="lazy" alt="Three layer-wise plots compare contaminated samples in red with clean samples in blue for RSM, DC, and RSI. Their profiles diverge across layers, with particularly clear separation in the DC plot.">
+          </a>
+          <figcaption>Representation geometry in an RL model: clean and contaminated samples exhibit distinct layer-wise profiles across the three metrics.</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section class="section hero is-light" aria-labelledby="protocol-title">
+      <div class="container is-max-desktop content">
+        <h2 class="title is-3" id="protocol-title">Contamination detection protocol</h2>
+        <ol class="lara-protocol">
+          <li><strong>Clean-reference robust standardization.</strong> Normalize each metric at each layer using the clean-reference median and a robust scale of 1.4826 times the median absolute deviation (MAD).</li>
+          <li><strong>Metric-specific anomaly alignment.</strong> Retain the standardized RSM and DC scores and negate the standardized RSI score to align the anomaly directions.</li>
+          <li><strong>Layer-wise aggregation.</strong> Average the aligned scores across the selected metrics and layers to obtain the final LaRA contamination score.</li>
+        </ol>
+        <p class="lara-score">Higher LaRA score <span aria-hidden="true">→</span> more likely contaminated. Lower score <span aria-hidden="true">→</span> more likely clean.</p>
+      </div>
+    </section>
+    <section class="section" aria-labelledby="results-title">
+      <div class="container is-max-desktop content">
+        <h2 class="title is-3" id="results-title">Results &amp; analysis</h2>
+        <p>The poster compares LaRA with output-level baselines across Eurus, LIMR, and OLMO, and across training checkpoints. The results show that representation-level signals can improve detection and complement output-level metrics, with gains varying by model and checkpoint.</p>
+        <div class="lara-result-highlights">
+          <div><strong>0.80 AUC</strong><span>LaRA on LIMR at the initial checkpoint, compared with 0.73 for PPL.</span></div>
+          <div><strong>0.81 AUC</strong><span>LaRA on LIMR at E2, compared with 0.74 for PPL.</span></div>
+          <div><strong>0.79 AUC</strong><span>SC + LaRA on Eurus at E2, compared with 0.78 for SC alone.</span></div>
+        </div>
+        <figure class="lara-figure">
+          <a href="static/images/lara-detection-results.png" target="_blank" rel="noopener noreferrer" aria-label="View the detection results tables at full size">
+            <img src="static/images/lara-detection-results.png" width="1581" height="443" loading="lazy" alt="Poster results tables reporting AUC and TPR for output-level baselines, LaRA, and SC plus LaRA across Eurus, LIMR, and OLMO, including initial, E1, and E2 checkpoints for Eurus and LIMR.">
+          </a>
+          <figcaption>Detection results reproduced from the poster. Select any figure to view it at full size.</figcaption>
+        </figure>
+        <h3>Robustness to perturbations</h3>
+        <p>The poster evaluates different numbers of blanks and several perturbation types: information removal, number replacement, variable renaming, and distractor insertion. Detection performance varies across these settings, supporting the analysis of robustness to perturbation choices.</p>
+        <figure class="lara-figure">
+          <a href="static/images/lara-perturbation-robustness.png" target="_blank" rel="noopener noreferrer" aria-label="View the perturbation robustness plots at full size">
+            <img src="static/images/lara-perturbation-robustness.png" width="1542" height="413" loading="lazy" alt="Robustness plots show AUC and TPR at 5 percent FPR for one to four blanks, and compare detection performance for information removal, number replacement, variable renaming, and distractor insertion.">
+          </a>
+          <figcaption>Effects of the number of blanks and the perturbation type on LaRA detection.</figcaption>
+        </figure>
+        <h3>Metric ablations</h3>
+        <div class="lara-ablation">
+          <figure class="lara-figure">
+            <a href="static/images/lara-ablations.png" target="_blank" rel="noopener noreferrer" aria-label="View the metric ablation table at full size">
+              <img src="static/images/lara-ablations.png" width="569" height="367" loading="lazy" alt="Ablation table compares individual metrics and their combinations across initial, E1, and E2 checkpoints. Combining RSM, DC, and RSI achieves AUC values of 0.80, 0.72, and 0.81, respectively.">
+            </a>
+            <figcaption>Metric ablations across RL training epochs.</figcaption>
+          </figure>
+          <div>
+            <p>The poster highlights <strong>DC as the strongest standalone detection signal</strong> and emphasizes the complementary role of all three metrics.</p>
+            <p>Combining RSM, DC, and RSI yields AUC values of <strong>0.80, 0.72, and 0.81</strong> at the initial, E1, and E2 checkpoints, respectively.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section hero is-light" aria-labelledby="takeaways-title">
+      <div class="container is-max-desktop content">
+        <h2 class="title is-3" id="takeaways-title">Key takeaways</h2>
         <ul>
-          <li><strong>Representation Shift Magnitude (RSM):</strong> sensitivity to removing key information.</li>
-          <li><strong>Directional Collapse (DC):</strong> alignment of representation shifts within a group of similar questions.</li>
-          <li><strong>Representation Stability Index (RSI):</strong> local variability under paraphrased perturbations.</li>
+          <li><strong>Look inside the model.</strong> Hidden representations provide a useful lens for detecting contamination in RL post-training.</li>
+          <li><strong>Memorization leaves geometric signatures.</strong> Controlled perturbations reveal differences between clean and contaminated samples across layers.</li>
+          <li><strong>Combine complementary signals.</strong> LaRA brings together shift magnitude, directional collapse, and local stability as a framework for studying post-training.</li>
         </ul>
-        <p>The detection protocol standardizes these measurements against clean reference samples, aligns their anomaly directions, and aggregates deviations across layers. See the <a href="https://arxiv.org/html/2605.29888v2">full paper</a> for the method, experiments, and limitations.</p>
+        <p>The motivation and method overview figures are available as original PDFs above. Results and analysis figures are reproduced from the <a href="static/pdfs/emnlp_lara_poster_A0.pdf" target="_blank" rel="noopener noreferrer">LaRA poster</a>. See the <a href="https://arxiv.org/html/2605.29888v2">full paper</a> for the complete method, experimental setup, and limitations.</p>
       </div>
     </section>
     <section class="section" id="BibTeX" aria-labelledby="citation-title">
@@ -152,6 +256,43 @@
 </footer>
 
   <script>
+    (() => {
+      const glow = document.querySelector('.cursor-glow');
+      const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+      let frame = 0;
+      let x = 0;
+      let y = 0;
+
+      const hideGlow = () => {
+        cancelAnimationFrame(frame);
+        frame = 0;
+        glow.classList.remove('is-active');
+      };
+
+      window.addEventListener('pointermove', (event) => {
+        if (!finePointer.matches || event.pointerType !== 'mouse') {
+          hideGlow();
+          return;
+        }
+        x = event.clientX;
+        y = event.clientY;
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          glow.style.setProperty('--cursor-x', `${x}px`);
+          glow.style.setProperty('--cursor-y', `${y}px`);
+          glow.classList.add('is-active');
+          frame = 0;
+        });
+      }, { passive: true });
+
+      document.documentElement.addEventListener('pointerleave', hideGlow);
+      window.addEventListener('blur', hideGlow);
+      finePointer.addEventListener('change', hideGlow);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) hideGlow();
+      });
+    })();
+
     document.getElementById('copy-bibtex').addEventListener('click', async () => {
       const status = document.getElementById('copy-status');
       try {
